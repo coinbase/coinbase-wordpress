@@ -1,0 +1,14 @@
+.coinbase-currency {
+	width: 65px;
+}
+.coinbase-price {
+	width: 106px;
+}
+#coinbase-toggle {
+	cursor: pointer;
+}
+#coinbase-advanced {
+	/*
+	display: none;
+	margin-top: 7px; */
+}
