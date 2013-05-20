@@ -58,7 +58,8 @@ class Coinbase_Button extends WP_Widget {
 		$button_args['style'] = $style;
 
 		$api_key = wpsf_get_setting( 'coinbase', 'general', 'api_key' );
-        $button = coinbase_button($button_args, $api_key);
+        $coinbase = new Coinbase($api_key);
+        $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
 
         echo $button;
 

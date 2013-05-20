@@ -10,7 +10,7 @@ Author URI: https://coinbase.com
 define('COINBASE_PATH', plugin_dir_path( __FILE__ ));
 define('COINBASE_URL', plugins_url( '', __FILE__ ));
 
-require_once(plugin_dir_path( __FILE__ ) . 'functions.php');
+require_once(plugin_dir_path( __FILE__ ) . 'coinbase-php/lib/Coinbase.php');
 require_once(plugin_dir_path( __FILE__ ) . 'widget.php');
 
 
@@ -60,7 +60,7 @@ class WP_Coinbase {
 	
 	function validate_settings( $input ) {
 		$output = $input;
-		$output['coinbase_general_api_key'] = base64_encode($input['coinbase_general_api_key']);
+		$output['coinbase_general_api_key'] = $input['coinbase_general_api_key'];
     	return $output;
 	}
 
@@ -77,7 +77,8 @@ class WP_Coinbase {
         $args = shortcode_atts($defaults, $atts);
         $api_key = wpsf_get_setting( 'coinbase', 'general', 'api_key' );
 
-        $button = coinbase_button($args, $api_key);
+        $coinbase = new Coinbase($api_key);
+        $button = $coinbase->createButtonWithOptions($args)->embedHtml;
 
         return $button;
     }

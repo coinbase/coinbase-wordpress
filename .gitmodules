@@ -1,0 +1,3 @@
+[submodule "coinbase-php"]
+	path = coinbase-php
+	url = https://github.com/coinbase/coinbase-php.git
