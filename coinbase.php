@@ -2,7 +2,7 @@
 /*
 Plugin Name: Coinbase
 Description: Enables a shortcode for adding Coinbase payment buttons to your WordPress site.
-Version: 0.1
+Version: 0.2
 Author: Coinbase
 Author URI: https://coinbase.com
 */
