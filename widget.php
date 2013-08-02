@@ -63,9 +63,13 @@ class Coinbase_Button extends WP_Widget {
     $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
 		$tokens = get_option( 'coinbase_tokens' );
     $coinbase = new Coinbase($coinbaseOauth, $tokens);
-    $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
-
-    echo $button;
+    
+    if($tokens) {
+      $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
+      echo $button;
+    } else {
+      echo "The Coinbase plugin has not been properly set up - please visit the Coinbase settings page in your administrator console.";
+    }
 
 		echo $after_widget;
 	}

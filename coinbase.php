@@ -103,8 +103,10 @@ class WP_Coinbase {
           <input type="submit" value="<?php _e( 'Unlink Coinbase Account' ); ?>">
         </form>
       </p>
-      <h3>Shortcodes</h3>
-      
+      <h3>How to Use</h3>
+      <p>You can now use the shortcode <span style="font-family: monospace;">[coinbase_button]</span> to create buttons:</p>
+      <p style="font-family: monospace;">[coinbase_button name="Socks" price_string="10.00" price_currency_iso="CAD"]</p>
+      <p>You can also create a menu widget from <a href="widgets.php">the Widgets page.</a></p>
       <?php
       }
 			?>
@@ -135,10 +137,13 @@ class WP_Coinbase {
       $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
       $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
       $tokens = get_option( 'coinbase_tokens' );
-      $coinbase = new Coinbase($coinbaseOauth, $tokens);
-      $button = $coinbase->createButtonWithOptions($args)->embedHtml;
-
-      return $button;
+      if($tokens) {
+        $coinbase = new Coinbase($coinbaseOauth, $tokens);
+        $button = $coinbase->createButtonWithOptions($args)->embedHtml;
+        return $button;
+      } else {
+        return "The Coinbase plugin has not been properly set up - please visit the Coinbase settings page in your administrator console.";
+      }
     }
 
     public function admin_styles() {
