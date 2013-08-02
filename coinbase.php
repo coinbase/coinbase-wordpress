@@ -27,6 +27,7 @@ class WP_Coinbase {
         $this->plugin_url = plugin_dir_url( __FILE__ );
         $this->l10n = 'wp-settings-framework';
         add_action( 'admin_menu', array(&$this, 'admin_menu'), 99 );
+        add_action( 'admin_init', array(&$this, 'admin_init'), 99 );
         add_action('admin_enqueue_scripts', array(&$this, 'admin_styles'), 1);
         add_action('admin_enqueue_scripts', array(&$this, 'widget_scripts'));
         
@@ -43,15 +44,69 @@ class WP_Coinbase {
         add_submenu_page( 'options-general.php', __( 'Coinbase', $this->l10n ), __( 'Coinbase', $this->l10n ), 'update_core', 'coinbase', array(&$this, 'settings_page') );
     }
     
+    function admin_init() {
+        register_setting ( 'coinbase', 'coinbase-tokens' );
+    }
+    
     function settings_page() {
+      $redirectUrl = plugins_url( 'coinbase-wordpress/coinbase-redirect.php' );
+      $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
+      $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
+      $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, $redirectUrl);
+        
 	    // Your settings page
+      if($_GET['coinbase_code'] != "") {
+        // This is a return from the OAuth redirect (coinbase-redirect.php)
+        // Store tokens
+        $tokens = $coinbaseOauth->getTokens($_GET['coinbase_code']);
+        update_option( 'coinbase_tokens', $tokens );
+        ?>
+        <script type="text/javascript">
+        document.location.replace(document.location.toString().split("?")[0] + "?page=coinbase");
+        </script>
+        <?php
+      } else if($_POST['coinbase_reset_tokens']) {
+        update_option( 'coinbase_tokens', false );
+      }
 	    ?>
 		<div class="wrap">
 			<div id="icon-options-general" class="icon32"></div>
 			<h2>Coinbase</h2>
+      <?php
+      if( get_option( 'coinbase_tokens' ) == false ) {
+      ?>
+      <h3>Setup</h3>
+      <p>First, create an <b>OAuth2 application</b> for this plugin at <a href="https://coinbase.com/oauth/applications">https://coinbase.com/oauth/applications</a>.</p>
+
+      <p>Enter anything in the Name box, and enter <input type="text" value="<?php echo $redirectUrl; ?>"> as the <b>redirect URI</b>.</p>
+
+      <p>Then, copy and paste the <b>Client ID</b> and <b>Client Secret</b> below. Click the 'Save Changes' button.</p>
+
+      <?php 
+      if($clientId != "") {
+      ?>
+      <p>Once you have saved the Client ID and Client Secret, <b>press the button below</b> to authorize the plugin.</p>
+      <?php
+        $authorizeUrl = $coinbaseOauth->createAuthorizeUrl("buttons");
+      ?>
+      <p><a href="<?php echo $authorizeUrl; ?>" class="button"><?php _e( 'Authorize Wordpress Plugin' ); ?></a></p>
 			<?php 
+      }
 			// Output your settings form
 			$this->wpsf->settings(); 
+      } else {
+      ?>
+      <p>Logged in.</p>
+      <p>
+        <form action="?page=coinbase" method="post">
+          <input type="hidden" name="coinbase_reset_tokens" value="true">
+          <input type="submit" value="<?php _e( 'Unlink Coinbase Account' ); ?>">
+        </form>
+      </p>
+      <h3>Shortcodes</h3>
+      
+      <?php
+      }
 			?>
 		</div>
 		<?php
@@ -75,12 +130,15 @@ class WP_Coinbase {
               'style' => 'buy_now_large');
 
         $args = shortcode_atts($defaults, $atts);
-        $api_key = wpsf_get_setting( 'coinbase', 'general', 'api_key' );
+        
+      $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
+      $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
+      $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
+      $tokens = get_option( 'coinbase_tokens' );
+      $coinbase = new Coinbase($coinbaseOauth, $tokens);
+      $button = $coinbase->createButtonWithOptions($args)->embedHtml;
 
-        $coinbase = new Coinbase($api_key);
-        $button = $coinbase->createButtonWithOptions($args)->embedHtml;
-
-        return $button;
+      return $button;
     }
 
     public function admin_styles() {

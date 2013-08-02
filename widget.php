@@ -57,11 +57,15 @@ class Coinbase_Button extends WP_Widget {
 		$style = $instance['type'] . '_' . $size;
 		$button_args['style'] = $style;
 
-		$api_key = wpsf_get_setting( 'coinbase', 'general', 'api_key' );
-        $coinbase = new Coinbase($api_key);
-        $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
+    // Create button code
+    $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
+    $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
+    $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
+		$tokens = get_option( 'coinbase_tokens' );
+    $coinbase = new Coinbase($coinbaseOauth, $tokens);
+    $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
 
-        echo $button;
+    echo $button;
 
 		echo $after_widget;
 	}
