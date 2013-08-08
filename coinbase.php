@@ -138,8 +138,16 @@ class WP_Coinbase {
       $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
       $tokens = get_option( 'coinbase_tokens' );
       if($tokens) {
-        $coinbase = new Coinbase($coinbaseOauth, $tokens);
-        $button = $coinbase->createButtonWithOptions($args)->embedHtml;
+        try {
+          $coinbase = new Coinbase($coinbaseOauth, $tokens);
+          $button = $coinbase->createButtonWithOptions($args)->embedHtml;
+        } catch (Coinbase_TokensExpiredException $e) {
+          $tokens = $coinbaseOauth->refreshTokens($tokens);
+          update_option( 'coinbase_tokens', $tokens );
+
+          $coinbase = new Coinbase($coinbaseOauth, $tokens);
+          $button = $coinbase->createButtonWithOptions($args)->embedHtml;
+        }
         return $button;
       } else {
         return "The Coinbase plugin has not been properly set up - please visit the Coinbase settings page in your administrator console.";
