@@ -57,18 +57,27 @@ class Coinbase_Button extends WP_Widget {
 		$style = $instance['type'] . '_' . $size;
 		$button_args['style'] = $style;
 
-    // Create button code
-    $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
-    $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
-    $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
-		$tokens = get_option( 'coinbase_tokens' );
-    $coinbase = new Coinbase($coinbaseOauth, $tokens);
-    
-    if($tokens) {
-      $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
-      echo $button;
+    $transient_name = 'cb_ecc_' . md5(serialize($button_args));
+    $cached = get_transient($transient_name);
+    if($cached !== false) {
+      // Cached
+      echo $cached;
     } else {
-      echo "The Coinbase plugin has not been properly set up - please visit the Coinbase settings page in your administrator console.";
+
+      // Create button code
+      $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
+      $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
+      $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
+      $tokens = get_option( 'coinbase_tokens' );
+      $coinbase = new Coinbase($coinbaseOauth, $tokens);
+
+      if($tokens) {
+        $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
+        set_transient($transient_name, $button);
+        echo $button;
+      } else {
+        echo "The Coinbase plugin has not been properly set up - please visit the Coinbase settings page in your administrator console.";
+      }
     }
 
 		echo $after_widget;

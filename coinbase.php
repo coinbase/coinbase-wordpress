@@ -132,7 +132,13 @@ class WP_Coinbase {
               'style' => 'buy_now_large');
 
         $args = shortcode_atts($defaults, $atts);
-        
+
+        $transient_name = 'cb_ecc_' . md5(serialize($args));
+        $cached = get_transient($transient_name);
+        if($cached !== false) {
+          return $cached;
+        }
+
       $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
       $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
       $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
@@ -148,6 +154,7 @@ class WP_Coinbase {
           $coinbase = new Coinbase($coinbaseOauth, $tokens);
           $button = $coinbase->createButtonWithOptions($args)->embedHtml;
         }
+        set_transient($transient_name, $button);
         return $button;
       } else {
         return "The Coinbase plugin has not been properly set up - please visit the Coinbase settings page in your administrator console.";
