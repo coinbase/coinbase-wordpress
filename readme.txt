@@ -18,4 +18,4 @@ A menu widget is also included.
 
 == Installation ==
 
-Download the latest version of the plugin and install it under wp-content/plugins/coinbase-wordpress. Visit the Coinbase Settings panel in your site's administrator panel, and follow the instructions to connect the plugin with your Coinbase account.
+Download the latest version of the plugin and install it under `wp-content/plugins/coinbase`. Visit the Coinbase Settings panel in your site's administrator panel, and follow the instructions to connect the plugin with your Coinbase account.

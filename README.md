@@ -4,7 +4,7 @@ A Wordpress plugin and widget that lets you accept bitcoin on your site!
 
 ## Installation
 
-Download the latest version of the plugin and install it under `wp-content/plugins/coinbase-wordpress`.
+Download the latest version of the plugin and install it under `wp-content/plugins/coinbase`.
 
 ![Screenshot](screenshot.png)
 

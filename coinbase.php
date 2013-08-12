@@ -49,7 +49,7 @@ class WP_Coinbase {
     }
     
     function settings_page() {
-      $redirectUrl = plugins_url( 'coinbase-wordpress/coinbase-redirect.php' );
+      $redirectUrl = plugins_url( 'coinbase/coinbase-redirect.php' );
       $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
       $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
       $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, $redirectUrl);
