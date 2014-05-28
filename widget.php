@@ -1,4 +1,25 @@
 <?php
+
+/* 
+
+Copyright (C) 2014 Coinbase Inc.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+*/
+
 /**
  * Registers the Coinbase Button widget
  *
@@ -64,15 +85,17 @@ class Coinbase_Button extends WP_Widget {
       echo $cached;
     } else {
 
-      // Create button code
-      $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
-      $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
-      $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
-      $tokens = get_option( 'coinbase_tokens' );
-      $coinbase = new Coinbase($coinbaseOauth, $tokens);
-
-      if($tokens) {
-        $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
+      $api_key = wpsf_get_setting( 'coinbase', 'general', 'api_key' );
+      $api_secret = wpsf_get_setting( 'coinbase', 'general', 'api_secret' );
+      if( $api_key && $api_secret ) {
+        try {
+          $coinbase = Coinbase::withApiKey($api_key, $api_secret);
+          $button = $coinbase->createButtonWithOptions($button_args)->embedHtml;
+        } catch (Exception $e) {
+          $msg = $e->getMessage();
+          error_log($msg);
+          echo "There was an error connecting to Coinbase: $msg. Please check your internet connection and API credentials.";
+        }
         set_transient($transient_name, $button);
         echo $button;
       } else {

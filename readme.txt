@@ -1,5 +1,5 @@
 === Coinbase ===
-Contributors: isaacwaller
+Contributors: isaacwaller, aianus
 Tags: bitcoin, coinbase, 
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -18,11 +18,11 @@ A menu widget is also included.
 
 == Installation ==
 
+0. Generate an API key with the 'user' and 'merchant' permissions at https://coinbase.com/settings/api. For security reasons, please do not grant any other permissions to this key. If you don't have a Coinbase account, sign up at https://coinbase.com/merchants. Coinbase offers daily payouts for merchants in the United States. For more infomation on setting up payouts, see https://coinbase.com/docs/merchant_tools/payouts.
+
 1. Visit your admin section and click Plugins -> Add New.  Then search for "Coinbase".
 
-2. Once you’ve installed the plugin, visit the Settings -> Coinbase page, and follow the instruction to connect it with your Coinbase account.
-
-Notice that you are only authenticating the widget to create payment buttons with your Coinbase account, and nothing else.  It won’t have access to send, receive, or do anything else with your account.
+2. Once you’ve installed the plugin, visit the Settings -> Coinbase page and enter the credentials obtained in step 0.
 
 3. Now that the widget is enabled you can add a bitcoin payment button anywhere on your blog using one of two methods:
 
