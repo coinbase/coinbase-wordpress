@@ -10,11 +10,11 @@ A WordPress plugin and widget that lets you accept bitcoin on your site!
 
 1. Visit your WordPress site, then click "Plugins", and search for "coinbase"
 
-  ![Screenshot](screenshot1.png)
+  ![Screenshot](screenshot-1.png)
 
 2. Go to "Settings" -> "Coinbase", and enter the credentials obtained in step 0.
 
-  ![Screenshot](screenshot2.png)
+  ![Screenshot](screenshot-2.png)
 
 3. Now that the widget is enabled you can add a bitcoin payment button anywhere on your blog using one of two methods:
 
@@ -26,4 +26,4 @@ A WordPress plugin and widget that lets you accept bitcoin on your site!
 
   * a WordPress “widget” that appears in the right sidebar of your app.
 
-    ![Screenshot](screenshot4.png)
+    ![Screenshot](screenshot-4.png)

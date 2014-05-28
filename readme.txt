@@ -36,6 +36,6 @@ You can add any customizable values as described in our documentation.  This wor
 
 == Screenshots ==
 
-1. Using the Coinbase menu widget, you can add bitcoin buttons to your sidebar.
-2. Use the coinbase_button shortcode to insert buttons into your posts.
-3. Configure the plugin from the Settings menu.
+1. Install from the plugin repository
+2. Configure the plugin from the Settings menu.
+4. Using the Coinbase menu widget, you can add bitcoin buttons to your sidebar.
