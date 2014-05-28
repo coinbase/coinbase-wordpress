@@ -1,10 +1,32 @@
 <?php
-/*
-Plugin Name: Coinbase
-Description: Enables a shortcode for adding Coinbase payment buttons to your WordPress site.
-Version: 0.2
-Author: Coinbase
-Author URI: https://coinbase.com
+/**
+ * Plugin Name: Coinbase
+ * Plugin URI: https://github.com/coinbase/coinbase-wordpress
+ * Description: Add Coinbase payment buttons to your WordPress site.
+ * Version: 1.0
+ * Author: Coinbase Inc.
+ * Author URI: https://coinbase.com
+ * License: GPLv2 or later
+ */
+
+/* 
+
+Copyright (C) 2014 Coinbase Inc.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 */
 
 define('COINBASE_PATH', plugin_dir_path( __FILE__ ));
@@ -32,8 +54,6 @@ class WP_Coinbase {
     // Include and create a new WordPressSettingsFramework
     require_once( $this->plugin_path .'wp-settings-framework.php' );
     $this->wpsf = new WordPressSettingsFramework( $this->plugin_path .'settings/coinbase.php' );
-    // Add an optional settings validation filter (recommended)
-    add_filter( $this->wpsf->get_option_group() .'_settings_validate', array(&$this, 'validate_settings') );
 
     add_shortcode('coinbase_button', array(&$this, 'shortcode'));
   }
@@ -41,81 +61,25 @@ class WP_Coinbase {
   function admin_menu() {
     add_submenu_page( 'options-general.php', __( 'Coinbase', $this->l10n ), __( 'Coinbase', $this->l10n ), 'update_core', 'coinbase', array(&$this, 'settings_page') );
   }
-  
+
   function admin_init() {
     register_setting ( 'coinbase', 'coinbase-tokens' );
   }
-  
+
   function settings_page() {
-    $redirectUrl = plugins_url( 'coinbase/coinbase-redirect.php' );
-    $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
-    $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
-    $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, $redirectUrl);
-      
-    // Your settings page
-    if($_GET['coinbase_code'] != "") {
-      // This is a return from the OAuth redirect (coinbase-redirect.php)
-      // Store tokens
-      $tokens = $coinbaseOauth->getTokens($_GET['coinbase_code']);
-      update_option( 'coinbase_tokens', $tokens );
-      ?>
-      <script type="text/javascript">
-      document.location.replace(document.location.toString().split("?")[0] + "?page=coinbase");
-      </script>
-      <?php
-    } else if($_POST['coinbase_reset_tokens']) {
-      update_option( 'coinbase_tokens', false );
-    }
+    $api_key = wpsf_get_setting( 'coinbase', 'general', 'api_key' );
+    $api_secret = wpsf_get_setting( 'coinbase', 'general', 'api_secret' );
+
     ?>
-    <div class="wrap">
-      <div id="icon-options-general" class="icon32"></div>
-      <h2>Coinbase</h2>
-      <?php
-      if( get_option( 'coinbase_tokens' ) == false ) {
-      ?>
-      <h3>Setup</h3>
-      <p>First, create an <b>OAuth2 application</b> for this plugin at <a href="https://coinbase.com/oauth/applications">https://coinbase.com/oauth/applications</a>.</p>
+      <div class="wrap">
+        <div id="icon-options-general" class="icon32"></div>
+        <h2>Coinbase</h2>
 
-      <p>Enter anything in the Name box, and enter <input type="text" value="<?php echo $redirectUrl; ?>"> as the <b>redirect URI</b>.</p>
-
-      <p>Then, copy and paste the <b>Client ID</b> and <b>Client Secret</b> below. Click the 'Save Changes' button.</p>
-
-      <?php 
-      if($clientId != "") {
-      ?>
-      <p>Once you have saved the Client ID and Client Secret, <b>press the button below</b> to authorize the plugin.</p>
-      <?php
-        $authorizeUrl = $coinbaseOauth->createAuthorizeUrl("buttons");
-      ?>
-      <p><a href="<?php echo $authorizeUrl; ?>" class="button"><?php _e( 'Authorize Wordpress Plugin' ); ?></a></p>
-      <?php 
-      }
-      // Output your settings form
-      $this->wpsf->settings(); 
-      } else {
-      ?>
-      <p>Logged in.</p>
-      <p>
-        <form action="?page=coinbase" method="post">
-          <input type="hidden" name="coinbase_reset_tokens" value="true">
-          <input type="submit" value="<?php _e( 'Unlink Coinbase Account' ); ?>">
-        </form>
-      </p>
-      <h3>How to Use</h3>
-      <p>You can now use the shortcode <span style="font-family: monospace;">[coinbase_button]</span> to create buttons:</p>
-      <p style="font-family: monospace;">[coinbase_button name="Socks" price_string="10.00" price_currency_iso="CAD"]</p>
-      <p>You can also create a menu widget from <a href="widgets.php">the Widgets page.</a></p>
-      <?php
-      }
-      ?>
-    </div>
     <?php
-  }
-  
-  function validate_settings( $input ) {
-    $output = $input;
-    $output['coinbase_general_api_key'] = $input['coinbase_general_api_key'];
-      return $output;
+        $this->wpsf->settings();
+    ?>
+      </div>
+    <?php
   }
 
   function shortcode( $atts, $content = null ) {
@@ -136,20 +100,16 @@ class WP_Coinbase {
       return $cached;
     }
 
-    $clientId = wpsf_get_setting( 'coinbase', 'general', 'client_id' );
-    $clientSecret = wpsf_get_setting( 'coinbase', 'general', 'client_secret' );
-    $coinbaseOauth = new Coinbase_OAuth($clientId, $clientSecret, '');
-    $tokens = get_option( 'coinbase_tokens' );
-    if($tokens) {
+    $api_key = wpsf_get_setting( 'coinbase', 'general', 'api_key' );
+    $api_secret = wpsf_get_setting( 'coinbase', 'general', 'api_secret' );
+    if( $api_key && $api_secret ) {
       try {
-        $coinbase = new Coinbase($coinbaseOauth, $tokens);
+        $coinbase = Coinbase::withApiKey($api_key, $api_secret);
         $button = $coinbase->createButtonWithOptions($args)->embedHtml;
-      } catch (Coinbase_TokensExpiredException $e) {
-        $tokens = $coinbaseOauth->refreshTokens($tokens);
-        update_option( 'coinbase_tokens', $tokens );
-
-        $coinbase = new Coinbase($coinbaseOauth, $tokens);
-        $button = $coinbase->createButtonWithOptions($args)->embedHtml;
+      } catch (Exception $e) {
+        $msg = $e->getMessage();
+        error_log($msg);
+        return "There was an error connecting to Coinbase: $msg. Please check your internet connection and API credentials.";
       }
       set_transient($transient_name, $button);
       return $button;
