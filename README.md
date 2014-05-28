@@ -6,17 +6,17 @@ A WordPress plugin and widget that lets you accept bitcoin on your site!
 
 ### Install From Within WordPress
 
-0. Generate an API key with the 'user' and 'merchant' permissions at https://coinbase.com/settings/api. For security reasons, please do not grant any other permissions to this key. If you don't have a Coinbase account, sign up at https://coinbase.com/merchants. Coinbase offers daily payouts for merchants in the United States. For more infomation on setting up payouts, see https://coinbase.com/docs/merchant_tools/payouts.
+1. Generate an API key with the 'user' and 'merchant' permissions at https://coinbase.com/settings/api. For security reasons, please do not grant any other permissions to this key. If you don't have a Coinbase account, sign up at https://coinbase.com/merchants. Coinbase offers daily payouts for merchants in the United States. For more infomation on setting up payouts, see https://coinbase.com/docs/merchant_tools/payouts.
 
-1. Visit your WordPress site, then click "Plugins", and search for "coinbase"
+2. Visit your WordPress site, then click "Plugins", and search for "coinbase"
 
   ![Screenshot](screenshot-1.png)
 
-2. Go to "Settings" -> "Coinbase", and enter the credentials obtained in step 0.
+3. Go to "Settings" -> "Coinbase", and enter the credentials obtained in step 1.
 
   ![Screenshot](screenshot-2.png)
 
-3. Now that the widget is enabled you can add a bitcoin payment button anywhere on your blog using one of two methods:
+4. Now that the widget is enabled you can add a bitcoin payment button anywhere on your blog using one of two methods:
 
   * a “short code” that looks like this:
 
