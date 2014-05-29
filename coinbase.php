@@ -84,15 +84,31 @@ class WP_Coinbase {
 
   function shortcode( $atts, $content = null ) {
     $defaults = array(
-          'name' => 'test',
-          'price_string' => '1.23',
+          'name'               => 'test',
+          'price_string'       => '1.23',
           'price_currency_iso' => 'USD',
-          'custom' => 'Order123',
-          'description' => 'Sample description',
-          'type' => 'buy_now',
-          'style' => 'buy_now_large');
+          'custom'             => 'Order123',
+          'description'        => 'Sample description',
+          'type'               => 'buy_now',
+          'style'              => 'buy_now_large',
+          'text'               => 'Pay with Bitcoin',
+          'choose_price'       => false,
+          'variable_price'     => false,
+          'price1'             => '0.0',
+          'price2'             => '0.0',
+          'price3'             => '0.0',
+          'price4'             => '0.0',
+          'price5'             => '0.0',
+    );
 
-    $args = shortcode_atts($defaults, $atts);
+    $args = shortcode_atts($defaults, $atts, 'coinbase_button');
+
+    // Clear default price suggestions
+    for ($i = 1; $i <= 5; $i++) {
+      if ($args["price$i"] == '0.0') {
+        unset($args["price$i"]);
+      }
+    }
 
     $transient_name = 'cb_ecc_' . md5(serialize($args));
     $cached = get_transient($transient_name);
