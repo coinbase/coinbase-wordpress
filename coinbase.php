@@ -94,6 +94,8 @@ class WP_Coinbase {
           'text'               => 'Pay with Bitcoin',
           'choose_price'       => false,
           'variable_price'     => false,
+          ‘include_email’ => false,
+          ‘include_address’ => false,
           'price1'             => '0.0',
           'price2'             => '0.0',
           'price3'             => '0.0',
