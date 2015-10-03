@@ -1,24 +1,24 @@
 === Coinbase ===
 Contributors: isaacwaller, aianus
-Tags: bitcoin, coinbase, 
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tags: bitcoin, coinbase,
+License: MIT
+License URI: http://opensource.org/licenses/MIT
 Stable tag: trunk
 Requires at least: 3.0
-Tested up to: 3.8
+Tested up to: 4.3.1
 
 A Wordpress plugin and widget that lets you accept bitcoin on your site!
 
 == Description ==
-A Wordpress plugin and widget that lets you accept bitcoin on your site! Use the `[coinbase_button]` shortcode along with the parameters on [this page](https://coinbase.com/api/doc/1.0/buttons/create.html). Example:
+A Wordpress plugin and widget that lets you accept bitcoin on your site! Use the `[coinbase_button]` shortcode along with the parameters on [this page](https://developers.coinbase.com/api/v2#create-checkout). Example:
 
-`[coinbase_button name="Socks" price_string="10.00" price_currency_iso="CAD"]`
+`[coinbase_button name="Socks" amount="10.00" currency="CAD"]`
 
 A menu widget is also included.
 
 == Installation ==
 
-0. Generate an API key with the 'user' and 'merchant' permissions at https://coinbase.com/settings/api. For security reasons, please do not grant any other permissions to this key. If you don't have a Coinbase account, sign up at https://coinbase.com/merchants. Coinbase offers daily payouts for merchants in the United States. For more infomation on setting up payouts, see https://coinbase.com/docs/merchant_tools/payouts.
+0. Generate an API key with the 'wallet:checkouts:create' permission at https://coinbase.com/settings/api. For security reasons, please do not grant any other permissions to this key. If you don't have a Coinbase account, sign up at https://coinbase.com/merchants. Coinbase offers daily payouts for merchants in the United States. For more infomation on setting up payouts, see https://coinbase.com/docs/merchant_tools/payouts.
 
 1. Visit your admin section and click Plugins -> Add New.  Then search for "Coinbase".
 
@@ -28,7 +28,7 @@ A menu widget is also included.
 
 * a "short code" that looks like this:
 
-`[coinbase_button name="Alpaca Socks" price_string="10.00" price_currency_iso="CAD"]`
+`[coinbase_button name=”Alpaca Socks” amount=”10.00” currency=”CAD”]`
 
 You can add any customizable values as described in our documentation.  This works on any page or location of your site.
 

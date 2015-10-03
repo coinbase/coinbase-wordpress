@@ -1,0 +1,11 @@
+{
+    "name": "coinbase/coinbase-wordpress",
+    "description": "A Wordpress plugin and widget that lets you accept bitcoin on your site!",
+    "keywords": [ "bitcoin", "coinbase", "wordpress" ],
+    "homepage": "https://www.coinbase.com",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "coinbase/coinbase": "^2.2"
+    }
+}

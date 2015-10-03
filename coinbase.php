@@ -3,46 +3,55 @@
  * Plugin Name: Coinbase
  * Plugin URI: https://github.com/coinbase/coinbase-wordpress
  * Description: Add Coinbase payment buttons to your WordPress site.
- * Version: 1.0
+ * Version: 2.0
  * Author: Coinbase Inc.
- * Author URI: https://coinbase.com
- * License: GPLv2 or later
+ * Author URI: https://www.coinbase.com
+ * License: MIT
  */
 
-/* 
+/*
 
-Copyright (C) 2014 Coinbase Inc.
+The MIT License (MIT)
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+Copyright (c) 2015 Coinbase Inc.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 
 */
 
 define('COINBASE_PATH', plugin_dir_path( __FILE__ ));
 define('COINBASE_URL', plugins_url( '', __FILE__ ));
 
-require_once(plugin_dir_path( __FILE__ ) . 'coinbase-php/lib/Coinbase.php');
+require_once(plugin_dir_path( __FILE__ ) . '/vendor/autoload.php');
 require_once(plugin_dir_path( __FILE__ ) . 'widget.php');
 
+use Coinbase\Wallet\Client;
+use Coinbase\Wallet\Configuration;
+use Coinbase\Wallet\Resource\Checkout;
+use Coinbase\Wallet\Value\Money;
 class WP_Coinbase {
-
   private $plugin_path;
   private $plugin_url;
   private $l10n;
   private $wpsf;
 
-  function __construct() {  
+  function __construct() {
     $this->plugin_path = plugin_dir_path( __FILE__ );
     $this->plugin_url = plugin_dir_url( __FILE__ );
     $this->l10n = 'wp-settings-framework';
@@ -82,34 +91,47 @@ class WP_Coinbase {
     <?php
   }
 
-  function shortcode( $atts, $content = null ) {
-    $defaults = array(
-          'name'               => 'test',
-          'price_string'       => '1.23',
-          'price_currency_iso' => 'USD',
-          'custom'             => 'Order123',
-          'description'        => 'Sample description',
-          'type'               => 'buy_now',
-          'style'              => 'buy_now_large',
-          'text'               => 'Pay with Bitcoin',
-          'choose_price'       => false,
-          'variable_price'     => false,
-          'price1'             => '0.0',
-          'price2'             => '0.0',
-          'price3'             => '0.0',
-          'price4'             => '0.0',
-          'price5'             => '0.0',
+  public static function default_checkout_attributes() {
+    return array(
+      'name'                     => 'test',
+      'amount'                   => '1.23',
+      'currency'                 => 'USD',
+      'description'              => 'Sample description',
+      'type'                     => 'order',
+      'style'                    => 'buy_now_large',
+      'text'                     => '',
+      'custom'                   => 'custom',
+      'customer_defined_amount'  => false,
+      'amount_preset_1'          => '0.0',
+      'amount_preset_2'          => '0.0',
+      'amount_preset_3'          => '0.0',
+      'amount_preset_4'          => '0.0',
+      'amount_preset_5'          => '0.0'
     );
+  }
 
-    $args = shortcode_atts($defaults, $atts, 'coinbase_button');
-
-    // Clear default price suggestions
+  public static function process_checkout_attributes( $args ) {
+    // Transform scalar preset amounts into an array of Money
+    $price_suggestions = [];
     for ($i = 1; $i <= 5; $i++) {
-      if ($args["price$i"] == '0.0') {
-        unset($args["price$i"]);
+      if ($args["amount_preset_$i"] == '0.0') {
+        // Clear default price suggestions
+        unset($args["amount_preset_$i"]);
+      } else {
+        array_push($price_suggestions, $args["amount_preset_$i"]);
       }
     }
 
+    $args = array_merge($args, array(
+      'amount'         => new Money($args['amount'], $args['currency']),
+      'metadata'       => array( 'custom' => $args['custom']),
+      'amount_presets' => $price_suggestions
+    ));
+
+    return $args;
+  }
+
+  public function load_or_create_button( $args ) {
     $transient_name = 'cb_ecc_' . md5(serialize($args));
     $cached = get_transient($transient_name);
     if($cached !== false) {
@@ -120,8 +142,11 @@ class WP_Coinbase {
     $api_secret = wpsf_get_setting( 'coinbase', 'general', 'api_secret' );
     if( $api_key && $api_secret ) {
       try {
-        $coinbase = Coinbase::withApiKey($api_key, $api_secret);
-        $button = $coinbase->createButtonWithOptions($args)->embedHtml;
+        $configuration = Configuration::apiKey($api_key, $api_secret);
+        $client = Client::create($configuration);
+        $checkout = new Checkout($args);
+        $client->createCheckout($checkout);
+        $button = $checkout->getEmbedHtml();
       } catch (Exception $e) {
         $msg = $e->getMessage();
         error_log($msg);
@@ -132,6 +157,12 @@ class WP_Coinbase {
     } else {
       return "The Coinbase plugin has not been properly set up - please visit the Coinbase settings page in your administrator console.";
     }
+  }
+
+  public function shortcode( $atts, $content = null ) {
+    $args = shortcode_atts(self::default_checkout_attributes(), $atts, 'coinbase_button');
+
+    return $this->load_or_create_button(self::process_checkout_attributes($args));
   }
 
   public function admin_styles() {
